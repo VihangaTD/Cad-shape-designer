@@ -1,5 +1,6 @@
 pub mod bounds;
 pub mod dimension_data;
+pub mod export_request;
 pub mod point;
 pub mod preview_response;
 pub mod shape_config;

@@ -1,6 +1,6 @@
-use crate::geometry::bounds::calculate_bounds;
-use crate::geometry::dimensions::common::{horizontal_dimension, vertical_dimension};
+use crate::geometry::dimensions::common::edge_dimension;
 use crate::models::dimension_data::DimensionData;
+use crate::models::point::Point;
 use crate::models::shape_config::ShapeConfig;
 use crate::models::shape_geometry::ShapeGeometry;
 
@@ -8,25 +8,37 @@ pub fn build(
     geometry: &ShapeGeometry,
     shape_config: &ShapeConfig,
 ) -> Result<Vec<DimensionData>, String> {
-    let bounds = calculate_bounds(geometry);
+    let p = &geometry.points;
+
+    if p.len() != 3 {
+        return Err("Triangle requires 3 points.".to_string());
+    }
+
     let base = shape_config.parameters.get("base").copied().unwrap_or(0.0);
     let height = shape_config.parameters.get("height").copied().unwrap_or(0.0);
 
+    let left_base = p[0].clone();
+    let right_base = p[1].clone();
+    let apex = p[2].clone();
+
+    let base_mid = Point::new(
+        (left_base.x + right_base.x) / 2.0,
+        (left_base.y + right_base.y) / 2.0,
+    );
+
     Ok(vec![
-        horizontal_dimension(
+        edge_dimension(
             "base",
             format!("{base} mm"),
-            bounds.min_x,
-            bounds.max_x,
-            bounds.max_y,
+            left_base,
+            right_base,
             60.0,
         ),
-        vertical_dimension(
+        edge_dimension(
             "height",
             format!("{height} mm"),
-            bounds.min_y,
-            bounds.max_y,
-            bounds.max_x,
+            base_mid,
+            apex,
             60.0,
         ),
     ])

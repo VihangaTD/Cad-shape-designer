@@ -1,6 +1,6 @@
-use crate::geometry::bounds::calculate_bounds;
-use crate::geometry::dimensions::common::{horizontal_dimension, vertical_dimension};
+use crate::geometry::dimensions::common::edge_dimension;
 use crate::models::dimension_data::DimensionData;
+use crate::models::point::Point;
 use crate::models::shape_config::ShapeConfig;
 use crate::models::shape_geometry::ShapeGeometry;
 
@@ -8,10 +8,9 @@ pub fn build(
     geometry: &ShapeGeometry,
     shape_config: &ShapeConfig,
 ) -> Result<Vec<DimensionData>, String> {
-    let bounds = calculate_bounds(geometry);
     let p = &geometry.points;
 
-    if p.len() < 4 {
+    if p.len() != 4 {
         return Err("Trapezoid requires 4 points.".to_string());
     }
 
@@ -19,29 +18,40 @@ pub fn build(
     let bottom_width = shape_config.parameters.get("bottomWidth").copied().unwrap_or(0.0);
     let height = shape_config.parameters.get("height").copied().unwrap_or(0.0);
 
+    let top_left = p[0].clone();
+    let top_right = p[1].clone();
+    let bottom_right = p[2].clone();
+    let bottom_left = p[3].clone();
+
+    let top_mid = Point::new(
+        (top_left.x + top_right.x) / 2.0,
+        (top_left.y + top_right.y) / 2.0,
+    );
+    let bottom_mid = Point::new(
+        (bottom_left.x + bottom_right.x) / 2.0,
+        (bottom_left.y + bottom_right.y) / 2.0,
+    );
+
     Ok(vec![
-        horizontal_dimension(
+        edge_dimension(
             "topWidth",
             format!("{top_width} mm"),
-            p[0].x.min(p[1].x),
-            p[0].x.max(p[1].x),
-            p[0].y,
+            top_left,
+            top_right,
             -50.0,
         ),
-        horizontal_dimension(
+        edge_dimension(
             "bottomWidth",
             format!("{bottom_width} mm"),
-            p[3].x.min(p[2].x),
-            p[3].x.max(p[2].x),
-            p[2].y,
+            bottom_left,
+            bottom_right,
             60.0,
         ),
-        vertical_dimension(
+        edge_dimension(
             "height",
             format!("{height} mm"),
-            bounds.min_y,
-            bounds.max_y,
-            bounds.max_x,
+            top_mid,
+            bottom_mid,
             60.0,
         ),
     ])

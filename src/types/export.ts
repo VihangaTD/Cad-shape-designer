@@ -3,3 +3,8 @@ export type ExportType =
   | "detailed-png"
   | "dxf"
   | "detailed-dxf";
+
+export interface SavePngPayload {
+  fileName: string;
+  bytes: number[];
+}

@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import { Loader2, ScanSearch } from "lucide-react";
 import Panel from "../layout/Panel";
 import { useShapeStore } from "../../store/shapeStore";
@@ -5,7 +6,11 @@ import { usePreviewStore } from "../../store/previewStore";
 import { shapeMetaRegistry } from "../../shape-meta";
 import ShapePreviewCanvas from "./ShapePreviewCanvas";
 
-export default function PreviewStage() {
+interface PreviewStageProps {
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+}
+
+export default function PreviewStage({ canvasRef }: PreviewStageProps) {
   const config = useShapeStore((state) => state.config);
   const preview = usePreviewStore((state) => state.preview);
   const isLoading = usePreviewStore((state) => state.isLoading);
@@ -53,7 +58,7 @@ export default function PreviewStage() {
                 <p className="text-sm font-medium text-red-600">{error}</p>
               </div>
             ) : preview ? (
-              <ShapePreviewCanvas preview={preview} />
+              <ShapePreviewCanvas preview={preview} canvasRef={canvasRef} />
             ) : (
               <div className="flex h-full min-h-[420px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50">
                 <p className="text-sm font-medium text-slate-500">
@@ -74,7 +79,9 @@ export default function PreviewStage() {
                   key={key}
                   className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
                 >
-                  <span className="text-sm text-slate-600">{key}</span>
+                  <span className="text-sm capitalize text-slate-600">
+                    {key}
+                  </span>
                   <span className="text-sm font-semibold text-slate-900">
                     {value} mm
                   </span>

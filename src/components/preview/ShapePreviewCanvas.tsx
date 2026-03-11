@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState, type RefObject } from "react";
 import type { PreviewResponse } from "../../types/preview";
 import { svgToImage } from "../../utils/svgToImage";
 import {
@@ -13,12 +13,13 @@ import { drawDimensions } from "./drawDimensions";
 
 interface ShapePreviewCanvasProps {
   preview: PreviewResponse;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
 }
 
 export default function ShapePreviewCanvas({
   preview,
+  canvasRef,
 }: ShapePreviewCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
 
@@ -115,12 +116,12 @@ export default function ShapePreviewCanvas({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [image, preview, redrawKey]);
+  }, [canvasRef, image, preview, redrawKey]);
 
   return (
     <div className="relative h-full min-h-[420px] overflow-hidden rounded-xl border border-slate-200 bg-white">
       {imageError ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-white">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white">
           <p className="text-sm font-medium text-red-600">{imageError}</p>
         </div>
       ) : null}

@@ -1,5 +1,8 @@
 mod commands;
+mod geometry;
 mod models;
+mod shapes;
+mod svg;
 
 use commands::preview::generate_preview;
 

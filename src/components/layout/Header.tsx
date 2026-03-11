@@ -10,15 +10,10 @@ export default function Header() {
 
         <div>
           <h1 className="text-xl font-semibold text-slate-900">
-            Tauri CAD Shape Designer
+            CAD Shape Designer
           </h1>
           
         </div>
-      </div>
-
-      <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-        <Layers3 size={14} />
-        <span>Phase 1</span>
       </div>
     </header>
   );

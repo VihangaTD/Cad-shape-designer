@@ -8,3 +8,13 @@ pub struct Bounds {
     pub max_x: f64,
     pub max_y: f64,
 }
+
+impl Bounds {
+    pub fn width(&self) -> f64 {
+        self.max_x - self.min_x
+    }
+
+    pub fn height(&self) -> f64 {
+        self.max_y - self.min_y
+    }
+}

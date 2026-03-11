@@ -5,9 +5,11 @@ import Sidebar from "./components/layout/Sidebar";
 import PreviewStage from "./components/preview/PreviewStage";
 import ShapeEditor from "./components/shapeEditor/ShapeEditor";
 import ShapeLibrary from "./components/shapeLibrary/ShapeLibrary";
-
+import { usePreview } from "./hooks/usePreview";
 
 export default function App() {
+  usePreview();
+
   return (
     <AppShell
       header={<Header />}

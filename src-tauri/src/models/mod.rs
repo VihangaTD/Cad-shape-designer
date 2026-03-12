@@ -5,3 +5,7 @@ pub mod point;
 pub mod preview_response;
 pub mod shape_config;
 pub mod shape_geometry;
+pub mod annotations;
+pub mod layers;
+pub mod outline;
+pub mod writer;

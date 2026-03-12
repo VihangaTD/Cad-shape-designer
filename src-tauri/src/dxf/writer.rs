@@ -1,3 +1,7 @@
+use crate::dxf::layers::{
+    COLOR_CENTERLINES, COLOR_DIMENSIONS, COLOR_OUTLINE, LAYER_CENTERLINES,
+    LAYER_DIMENSIONS, LAYER_OUTLINE, LTYPE_CENTER, LTYPE_CONTINUOUS,
+};
 use crate::models::point::Point;
 
 pub struct DxfWriter {
@@ -41,6 +45,7 @@ impl DxfWriter {
 
         self.write_ltype_table();
         self.write_layer_table();
+        self.write_style_table();
 
         self.pair(0, "ENDSEC");
     }
@@ -51,7 +56,7 @@ impl DxfWriter {
         self.pair(70, 2);
 
         self.pair(0, "LTYPE");
-        self.pair(2, "CONTINUOUS");
+        self.pair(2, LTYPE_CONTINUOUS);
         self.pair(70, 0);
         self.pair(3, "Solid line");
         self.pair(72, 65);
@@ -59,7 +64,7 @@ impl DxfWriter {
         self.pair(40, 0.0);
 
         self.pair(0, "LTYPE");
-        self.pair(2, "CENTER");
+        self.pair(2, LTYPE_CENTER);
         self.pair(70, 0);
         self.pair(3, "Center ____ _ ____ _ ____");
         self.pair(72, 65);
@@ -78,9 +83,28 @@ impl DxfWriter {
         self.pair(2, "LAYER");
         self.pair(70, 3);
 
-        self.write_layer("OUTLINE", 7, "CONTINUOUS");
-        self.write_layer("DIMENSIONS", 1, "CONTINUOUS");
-        self.write_layer("CENTERLINES", 5, "CENTER");
+        self.write_layer(LAYER_OUTLINE, COLOR_OUTLINE, LTYPE_CONTINUOUS);
+        self.write_layer(LAYER_DIMENSIONS, COLOR_DIMENSIONS, LTYPE_CONTINUOUS);
+        self.write_layer(LAYER_CENTERLINES, COLOR_CENTERLINES, LTYPE_CENTER);
+
+        self.pair(0, "ENDTAB");
+    }
+
+    fn write_style_table(&mut self) {
+        self.pair(0, "TABLE");
+        self.pair(2, "STYLE");
+        self.pair(70, 1);
+
+        self.pair(0, "STYLE");
+        self.pair(2, "STANDARD");
+        self.pair(70, 0);
+        self.pair(40, 0.0);
+        self.pair(41, 1.0);
+        self.pair(50, 0.0);
+        self.pair(71, 0);
+        self.pair(42, 1.0);
+        self.pair(3, "txt");
+        self.pair(4, "");
 
         self.pair(0, "ENDTAB");
     }
@@ -118,7 +142,14 @@ impl DxfWriter {
         self.pair(40, radius);
     }
 
-    pub fn add_text(&mut self, layer: &str, position: &Point, height: f64, text: &str) {
+    pub fn add_text(
+        &mut self,
+        layer: &str,
+        position: &Point,
+        height: f64,
+        text: &str,
+        rotation: f64,
+    ) {
         self.pair(0, "TEXT");
         self.pair(8, layer);
         self.pair(10, position.x);
@@ -127,6 +158,12 @@ impl DxfWriter {
         self.pair(40, height);
         self.pair(1, text);
         self.pair(7, "STANDARD");
+        self.pair(50, rotation);
+        self.pair(72, 1); // centered horizontally
+        self.pair(73, 2); // middle vertically
+        self.pair(11, position.x);
+        self.pair(21, position.y);
+        self.pair(31, 0.0);
     }
 
     pub fn finish(mut self) -> String {

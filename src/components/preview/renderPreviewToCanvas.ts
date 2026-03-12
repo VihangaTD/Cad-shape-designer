@@ -1,0 +1,81 @@
+import type { PreviewResponse } from "../../types/preview";
+import {
+  clearCanvas,
+  getCanvasDisplaySize,
+  resizeCanvasToDisplaySize,
+} from "../../utils/canvas";
+import { drawDimensions } from "./drawDimensions";
+import { drawGrid } from "./drawGrid";
+import { drawShapeImage } from "./drawShapeImage";
+import { fitToViewport, type FitPadding } from "./fitToViewport";
+
+interface RenderPreviewToCanvasOptions {
+  canvas: HTMLCanvasElement;
+  image: CanvasImageSource;
+  preview: PreviewResponse;
+  showDimensions: boolean;
+  showGrid?: boolean;
+  padding?: number | FitPadding;
+  backgroundColor?: string;
+}
+
+export function renderPreviewToCanvas({
+  canvas,
+  image,
+  preview,
+  showDimensions,
+  showGrid = true,
+  padding = 40,
+  backgroundColor = "#ffffff",
+}: RenderPreviewToCanvasOptions): void {
+  const isOffscreenCanvas =
+    canvas.clientWidth === 0 || canvas.clientHeight === 0;
+
+  if (!isOffscreenCanvas) {
+    resizeCanvasToDisplaySize(canvas);
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const dpr = isOffscreenCanvas ? 1 : window.devicePixelRatio || 1;
+
+  const displaySize = isOffscreenCanvas
+    ? {
+        width: canvas.width,
+        height: canvas.height,
+      }
+    : getCanvasDisplaySize(canvas, dpr);
+
+  clearCanvas(ctx, canvas, backgroundColor);
+
+  ctx.save();
+  ctx.scale(dpr, dpr);
+
+  if (showGrid) {
+    drawGrid(ctx, displaySize.width, displaySize.height, 28);
+  }
+
+  const fit = fitToViewport(
+    preview.bounds,
+    displaySize.width,
+    displaySize.height,
+    padding
+  );
+
+  drawShapeImage(ctx, {
+    image,
+    fit,
+    imageBounds: preview.bounds,
+  });
+
+  if (showDimensions) {
+    drawDimensions({
+      ctx,
+      dimensions: preview.dimensions,
+      fit,
+    });
+  }
+
+  ctx.restore();
+}

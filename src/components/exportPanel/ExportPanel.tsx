@@ -7,9 +7,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { useShapeStore } from "../../store/shapeStore";
+import { usePreviewStore } from "../../store/previewStore";
 import { canvasToPngBytes } from "../../export/png";
 import { buildExportFilename } from "../../export/filenames";
 import { savePngFile } from "../../tauri/commands";
+import { svgToImage } from "../../utils/svgToImage";
+import { renderPreviewToCanvas } from "../preview/renderPreviewToCanvas";
 
 interface ExportPanelProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -32,41 +35,76 @@ const actions = [
 
 export default function ExportPanel({ canvasRef }: ExportPanelProps) {
   const config = useShapeStore((state) => state.config);
+  const preview = usePreviewStore((state) => state.preview);
 
   const [busyType, setBusyType] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+ const exportPng = async (
+  showDimensions: boolean,
+  type: "png" | "detailed-png"
+) => {
+  if (!preview) {
+    throw new Error("Preview data is not ready.");
+  }
+
+  const image = await svgToImage(preview.svg);
+
+  const exportCanvas = document.createElement("canvas");
+
+  const exportWidth = 1600;
+  const exportHeight = 1200;
+
+  exportCanvas.width = exportWidth;
+  exportCanvas.height = exportHeight;
+  exportCanvas.style.width = `${exportWidth}px`;
+  exportCanvas.style.height = `${exportHeight}px`;
+
+  renderPreviewToCanvas({
+    canvas: exportCanvas,
+    image,
+    preview,
+    showDimensions,
+    showGrid: false,
+    padding: showDimensions ? 80 : 20,
+    backgroundColor: "#ffffff",
+  });
+
+  const bytes = await canvasToPngBytes(exportCanvas);
+  const fileName = buildExportFilename(config, type);
+  const savedPath = await savePngFile(fileName, bytes);
+
+  setMessage(`PNG saved successfully: ${savedPath}`);
+};
   const handleExport = async (type: (typeof actions)[number]["type"]) => {
     setMessage(null);
     setError(null);
 
-    if (type === "dxf" || type === "detailed-dxf") {
-      setError("DXF export will be implemented in the next phase.");
-      return;
-    }
-
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      setError("Preview canvas is not ready.");
-      return;
-    }
-
     try {
       setBusyType(type);
 
-      const bytes = await canvasToPngBytes(canvas);
-      const fileName = buildExportFilename(config, type);
-      const savedPath = await savePngFile(fileName, bytes);
+      if (type === "png") {
+        await exportPng(false, "png");
+        return;
+      }
 
-      setMessage(`PNG saved successfully: ${savedPath}`);
+      if (type === "detailed-png") {
+        await exportPng(true, "detailed-png");
+        return;
+      }
+
+      if (type === "dxf" || type === "detailed-dxf") {
+        setError("DXF export will be implemented in the next phase.");
+        return;
+      }
     } catch (exportError) {
-      const message =
+      const nextMessage =
         exportError instanceof Error
           ? exportError.message
-          : "Failed to export PNG.";
+          : "Failed to export file.";
 
-      setError(message);
+      setError(nextMessage);
     } finally {
       setBusyType(null);
     }

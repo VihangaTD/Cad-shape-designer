@@ -13,7 +13,7 @@ pub fn apply_transforms(geometry: &ShapeGeometry, shape_config: &ShapeConfig) ->
         .iter()
         .map(|point| {
             let rotated = rotate_point(point, cx, cy, shape_config.rotation);
-            flip_point(&rotated, cx, cy, shape_config.flip_x, shape_config.flip_y)
+            flip_point(&rotated, cx, cy, shape_config.flip_y, shape_config.flip_x)
         })
         .collect::<Vec<_>>();
 
@@ -23,8 +23,8 @@ pub fn apply_transforms(geometry: &ShapeGeometry, shape_config: &ShapeConfig) ->
             &rotated_center,
             cx,
             cy,
-            shape_config.flip_x,
             shape_config.flip_y,
+            shape_config.flip_x,
         );
 
         CircleData {

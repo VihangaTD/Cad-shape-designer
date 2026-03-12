@@ -10,7 +10,7 @@ import { useShapeStore } from "../../store/shapeStore";
 import { usePreviewStore } from "../../store/previewStore";
 import { canvasToPngBytes } from "../../export/png";
 import { buildExportFilename } from "../../export/filenames";
-import { savePngFile } from "../../tauri/commands";
+import { saveDxfFile, savePngFile } from "../../tauri/commands";
 import { svgToImage } from "../../utils/svgToImage";
 import { renderPreviewToCanvas } from "../preview/renderPreviewToCanvas";
 
@@ -41,42 +41,50 @@ export default function ExportPanel({ canvasRef }: ExportPanelProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
- const exportPng = async (
-  showDimensions: boolean,
-  type: "png" | "detailed-png"
-) => {
-  if (!preview) {
-    throw new Error("Preview data is not ready.");
-  }
+  const exportPng = async (
+    showDimensions: boolean,
+    type: "png" | "detailed-png"
+  ) => {
+    if (!preview) {
+      throw new Error("Preview data is not ready.");
+    }
 
-  const image = await svgToImage(preview.svg);
+    const image = await svgToImage(preview.svg);
 
-  const exportCanvas = document.createElement("canvas");
+    const exportCanvas = document.createElement("canvas");
+    const exportWidth = 1600;
+    const exportHeight = 1200;
 
-  const exportWidth = 1600;
-  const exportHeight = 1200;
+    exportCanvas.width = exportWidth;
+    exportCanvas.height = exportHeight;
+    exportCanvas.style.width = `${exportWidth}px`;
+    exportCanvas.style.height = `${exportHeight}px`;
 
-  exportCanvas.width = exportWidth;
-  exportCanvas.height = exportHeight;
-  exportCanvas.style.width = `${exportWidth}px`;
-  exportCanvas.style.height = `${exportHeight}px`;
+    renderPreviewToCanvas({
+      canvas: exportCanvas,
+      image,
+      preview,
+      showDimensions,
+      showGrid: false,
+      padding: showDimensions
+        ? { top: 80, right: 140, bottom: 140, left: 80 }
+        : 20,
+      backgroundColor: "#ffffff",
+    });
 
-  renderPreviewToCanvas({
-    canvas: exportCanvas,
-    image,
-    preview,
-    showDimensions,
-    showGrid: false,
-    padding: showDimensions ? 80 : 20,
-    backgroundColor: "#ffffff",
-  });
+    const bytes = await canvasToPngBytes(exportCanvas);
+    const fileName = buildExportFilename(config, type);
+    const savedPath = await savePngFile(fileName, bytes);
 
-  const bytes = await canvasToPngBytes(exportCanvas);
-  const fileName = buildExportFilename(config, type);
-  const savedPath = await savePngFile(fileName, bytes);
+    setMessage(`PNG saved successfully: ${savedPath}`);
+  };
 
-  setMessage(`PNG saved successfully: ${savedPath}`);
-};
+  const exportDxf = async (detailed: boolean, type: "dxf" | "detailed-dxf") => {
+    const fileName = buildExportFilename(config, type);
+    const savedPath = await saveDxfFile(fileName, config, detailed);
+    setMessage(`DXF saved successfully: ${savedPath}`);
+  };
+
   const handleExport = async (type: (typeof actions)[number]["type"]) => {
     setMessage(null);
     setError(null);
@@ -94,9 +102,13 @@ export default function ExportPanel({ canvasRef }: ExportPanelProps) {
         return;
       }
 
-      if (type === "dxf" || type === "detailed-dxf") {
-        setError("DXF export will be implemented in the next phase.");
+      if (type === "dxf") {
+        await exportDxf(false, "dxf");
         return;
+      }
+
+      if (type === "detailed-dxf") {
+        await exportDxf(true, "detailed-dxf");
       }
     } catch (exportError) {
       const nextMessage =

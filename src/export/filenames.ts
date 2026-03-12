@@ -7,14 +7,17 @@ export function buildExportFilename(
 ): string {
   const shape = config.type;
 
-  const suffix =
-    exportType === "png"
-      ? "preview"
-      : exportType === "detailed-png"
-      ? "detailed-preview"
-      : exportType === "dxf"
-      ? "outline"
-      : "detailed-outline";
+  if (exportType === "png") {
+    return `${shape}-preview.png`;
+  }
 
-  return `${shape}-${suffix}.png`;
+  if (exportType === "detailed-png") {
+    return `${shape}-detailed-preview.png`;
+  }
+
+  if (exportType === "dxf") {
+    return `${shape}-outline.dxf`;
+  }
+
+  return `${shape}-detailed-outline.dxf`;
 }

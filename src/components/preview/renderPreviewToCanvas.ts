@@ -4,17 +4,13 @@ import {
   getCanvasDisplaySize,
   resizeCanvasToDisplaySize,
 } from "../../utils/canvas";
-import {
-  drawDimensionBodies,
-  drawDimensionExtensions,
-} from "./drawDimensions";
+import { drawDimensions } from "./drawDimensions";
 import { drawGrid } from "./drawGrid";
-import { drawShapeImage } from "./drawShapeImage";
+import { drawShapeVector } from "./drawShapeVector";
 import { fitToViewport, type FitPadding } from "./fitToViewport";
 
 interface RenderPreviewToCanvasOptions {
   canvas: HTMLCanvasElement;
-  image: CanvasImageSource;
   preview: PreviewResponse;
   showDimensions: boolean;
   showGrid?: boolean;
@@ -27,7 +23,6 @@ interface RenderPreviewToCanvasOptions {
 
 export function renderPreviewToCanvas({
   canvas,
-  image,
   preview,
   showDimensions,
   showGrid = true,
@@ -75,25 +70,14 @@ export function renderPreviewToCanvas({
     panY
   );
 
-  if (showDimensions) {
-    drawDimensionExtensions({
-      ctx,
-      dimensions: preview.dimensions,
-      fit,
-    });
-  }
-
-  ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  drawShapeImage(ctx, {
-    image,
+  drawShapeVector({
+    ctx,
+    preview,
     fit,
-    imageBounds: preview.bounds,
   });
-  ctx.restore();
 
   if (showDimensions) {
-    drawDimensionBodies({
+    drawDimensions({
       ctx,
       dimensions: preview.dimensions,
       fit,

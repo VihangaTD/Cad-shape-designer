@@ -11,7 +11,6 @@ import { usePreviewStore } from "../../store/previewStore";
 import { canvasToPngBytes } from "../../export/png";
 import { buildExportFilename } from "../../export/filenames";
 import { saveDxfFile, savePngFile } from "../../tauri/commands";
-import { svgToImage } from "../../utils/svgToImage";
 import { renderPreviewToCanvas } from "../preview/renderPreviewToCanvas";
 
 interface ExportPanelProps {
@@ -49,8 +48,6 @@ export default function ExportPanel({ canvasRef }: ExportPanelProps) {
       throw new Error("Preview data is not ready.");
     }
 
-    const image = await svgToImage(preview.svg);
-
     const exportCanvas = document.createElement("canvas");
     const exportWidth = 1600;
     const exportHeight = 1200;
@@ -62,7 +59,6 @@ export default function ExportPanel({ canvasRef }: ExportPanelProps) {
 
     renderPreviewToCanvas({
       canvas: exportCanvas,
-      image,
       preview,
       showDimensions,
       showGrid: false,
@@ -70,6 +66,9 @@ export default function ExportPanel({ canvasRef }: ExportPanelProps) {
         ? { top: 80, right: 140, bottom: 140, left: 80 }
         : 20,
       backgroundColor: "#ffffff",
+      zoom: 1,
+      panX: 0,
+      panY: 0,
     });
 
     const bytes = await canvasToPngBytes(exportCanvas);

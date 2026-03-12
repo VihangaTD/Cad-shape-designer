@@ -26,6 +26,11 @@ pub fn build(
         (left_base.y + right_base.y) / 2.0,
     );
 
+    let shape_center = Point::new(
+        (p[0].x + p[1].x + p[2].x) / 3.0,
+        (p[0].y + p[1].y + p[2].y) / 3.0,
+    );
+
     Ok(vec![
         edge_dimension(
             "base",
@@ -33,6 +38,7 @@ pub fn build(
             left_base,
             right_base,
             60.0,
+            &shape_center,
         ),
         edge_dimension(
             "height",
@@ -40,6 +46,7 @@ pub fn build(
             base_mid,
             apex,
             60.0,
+            &shape_center,
         ),
     ])
 }

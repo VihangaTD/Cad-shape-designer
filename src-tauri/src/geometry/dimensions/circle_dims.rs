@@ -23,6 +23,6 @@ pub fn build(
         format!("{radius} mm"),
         start,
         end,
-        Point::new(circle.center.x + circle.radius / 2.0, circle.center.y - 20.0),
+        Point::new(circle.center.x + circle.radius / 2.0, circle.center.y - 28.0),
     )])
 }

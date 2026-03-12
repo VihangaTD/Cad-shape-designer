@@ -7,7 +7,10 @@ pub fn edge_dimension(
     start: Point,
     end: Point,
     offset: f64,
+    shape_center: &Point,
 ) -> DimensionData {
+    let safe_offset = offset.abs();
+
     let dx = end.x - start.x;
     let dy = end.y - start.y;
     let length = (dx * dx + dy * dy).sqrt().max(1.0);
@@ -15,16 +18,38 @@ pub fn edge_dimension(
     let ux = dx / length;
     let uy = dy / length;
 
-    // perpendicular
-    let nx = -uy;
-    let ny = ux;
+    // 2 possible perpendicular directions
+    let nx1 = -uy;
+    let ny1 = ux;
 
-    let line_start = Point::new(start.x + nx * offset, start.y + ny * offset);
-    let line_end = Point::new(end.x + nx * offset, end.y + ny * offset);
+    let nx2 = uy;
+    let ny2 = -ux;
 
+    let mid_x = (start.x + end.x) / 2.0;
+    let mid_y = (start.y + end.y) / 2.0;
+
+    // candidate 1
+    let c1_x = mid_x + nx1 * safe_offset;
+    let c1_y = mid_y + ny1 * safe_offset;
+
+    // candidate 2
+    let c2_x = mid_x + nx2 * safe_offset;
+    let c2_y = mid_y + ny2 * safe_offset;
+
+    // pick the one farther from the shape center = outside
+    let d1 = ((c1_x - shape_center.x).powi(2) + (c1_y - shape_center.y).powi(2)).sqrt();
+    let d2 = ((c2_x - shape_center.x).powi(2) + (c2_y - shape_center.y).powi(2)).sqrt();
+
+    let (nx, ny) = if d1 >= d2 { (nx1, ny1) } else { (nx2, ny2) };
+
+    let line_start = Point::new(start.x + nx * safe_offset, start.y + ny * safe_offset);
+    let line_end = Point::new(end.x + nx * safe_offset, end.y + ny * safe_offset);
+
+    // text should also go away from the dimension line in outward direction
+    let text_gap = 14.0;
     let text_position = Point::new(
-        (line_start.x + line_end.x) / 2.0,
-        (line_start.y + line_end.y) / 2.0 - 12.0,
+        (line_start.x + line_end.x) / 2.0 + nx * text_gap,
+        (line_start.y + line_end.y) / 2.0 + ny * text_gap,
     );
 
     DimensionData {

@@ -32,13 +32,19 @@ pub fn build(
         (bottom_left.y + bottom_right.y) / 2.0,
     );
 
+    let shape_center = Point::new(
+        p.iter().map(|pt| pt.x).sum::<f64>() / p.len() as f64,
+        p.iter().map(|pt| pt.y).sum::<f64>() / p.len() as f64,
+    );
+
     Ok(vec![
         edge_dimension(
             "topWidth",
             format!("{top_width} mm"),
             top_left,
             top_right,
-            -50.0,
+            50.0,
+            &shape_center,
         ),
         edge_dimension(
             "bottomWidth",
@@ -46,6 +52,7 @@ pub fn build(
             bottom_left,
             bottom_right,
             60.0,
+            &shape_center,
         ),
         edge_dimension(
             "height",
@@ -53,6 +60,7 @@ pub fn build(
             top_mid,
             bottom_mid,
             60.0,
+            &shape_center,
         ),
     ])
 }

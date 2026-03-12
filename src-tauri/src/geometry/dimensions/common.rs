@@ -18,7 +18,6 @@ pub fn edge_dimension(
     let ux = dx / length;
     let uy = dy / length;
 
-    // 2 possible perpendicular directions
     let nx1 = -uy;
     let ny1 = ux;
 
@@ -28,25 +27,33 @@ pub fn edge_dimension(
     let mid_x = (start.x + end.x) / 2.0;
     let mid_y = (start.y + end.y) / 2.0;
 
-    // candidate 1
     let c1_x = mid_x + nx1 * safe_offset;
     let c1_y = mid_y + ny1 * safe_offset;
 
-    // candidate 2
     let c2_x = mid_x + nx2 * safe_offset;
     let c2_y = mid_y + ny2 * safe_offset;
 
-    // pick the one farther from the shape center = outside
-    let d1 = ((c1_x - shape_center.x).powi(2) + (c1_y - shape_center.y).powi(2)).sqrt();
-    let d2 = ((c2_x - shape_center.x).powi(2) + (c2_y - shape_center.y).powi(2)).sqrt();
+    let d1 = (c1_x - shape_center.x).powi(2) + (c1_y - shape_center.y).powi(2);
+    let d2 = (c2_x - shape_center.x).powi(2) + (c2_y - shape_center.y).powi(2);
 
     let (nx, ny) = if d1 >= d2 { (nx1, ny1) } else { (nx2, ny2) };
 
     let line_start = Point::new(start.x + nx * safe_offset, start.y + ny * safe_offset);
     let line_end = Point::new(end.x + nx * safe_offset, end.y + ny * safe_offset);
 
-    // text should also go away from the dimension line in outward direction
-    let text_gap = 14.0;
+    let extension_overshoot = 8.0;
+
+    let ext1_end = Point::new(
+        line_start.x + nx * extension_overshoot,
+        line_start.y + ny * extension_overshoot,
+    );
+
+    let ext2_end = Point::new(
+        line_end.x + nx * extension_overshoot,
+        line_end.y + ny * extension_overshoot,
+    );
+
+    let text_gap = 16.0;
     let text_position = Point::new(
         (line_start.x + line_end.x) / 2.0 + nx * text_gap,
         (line_start.y + line_end.y) / 2.0 + ny * text_gap,
@@ -58,9 +65,9 @@ pub fn edge_dimension(
         line_start: line_start.clone(),
         line_end: line_end.clone(),
         ext1_start: start,
-        ext1_end: line_start,
+        ext1_end,
         ext2_start: end,
-        ext2_end: line_end,
+        ext2_end,
         text_position,
     }
 }

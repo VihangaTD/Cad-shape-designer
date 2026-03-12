@@ -4,6 +4,8 @@ import {
   Radius,
   RectangleHorizontal,
   Shapes,
+  ShapesIcon,
+  Triangle,
 } from "lucide-react";
 import Panel from "../layout/Panel";
 import { shapeMetaList } from "../../shape-meta";
@@ -13,9 +15,9 @@ import type { ShapeType } from "../../types/shape";
 const iconMap: Record<ShapeType, React.ComponentType<{ size?: number }>> = {
   rectangle: RectangleHorizontal,
   circle: Circle,
-  triangle: Pentagon,
+  triangle: Triangle,
   lshape: Shapes,
-  trapezoid: Radius,
+  trapezoid: ShapesIcon,
 };
 
 export default function ShapeLibrary() {

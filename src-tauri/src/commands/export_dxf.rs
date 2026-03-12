@@ -1,10 +1,10 @@
 use crate::commands::file_io::write_bytes_to_file;
 use crate::dxf::annotations::{write_centerlines, write_dimensions};
+use crate::dxf::normalize::{normalize_dimensions_for_dxf, normalize_geometry_for_dxf};
 use crate::dxf::outline::write_outline;
 use crate::dxf::writer::DxfWriter;
 use crate::geometry::bounds::calculate_bounds;
 use crate::geometry::dimensions::build_dimensions;
-use crate::geometry::normalize::normalize_geometry;
 use crate::geometry::transform::apply_transforms;
 use crate::models::export_request::SaveDxfRequest;
 use crate::shapes::build_shape_geometry;
@@ -18,18 +18,25 @@ pub async fn save_dxf_file(
 ) -> Result<String, String> {
     let raw_geometry = build_shape_geometry(&request.shape_config)?;
     let transformed_geometry = apply_transforms(&raw_geometry, &request.shape_config);
-    let normalized_geometry = normalize_geometry(&transformed_geometry, 40.0);
 
-    let bounds = calculate_bounds(&normalized_geometry);
-    let dimensions = build_dimensions(&normalized_geometry, &request.shape_config)?;
+    let original_bounds = calculate_bounds(&transformed_geometry);
+    let dimensions = build_dimensions(&transformed_geometry, &request.shape_config)?;
+
+    let dxf_margin = 20.0;
+
+    let (normalized_geometry, normalized_bounds) =
+        normalize_geometry_for_dxf(&transformed_geometry, dxf_margin);
+
+    let normalized_dimensions =
+        normalize_dimensions_for_dxf(&dimensions, &original_bounds, dxf_margin);
 
     let mut writer = DxfWriter::new();
 
     write_outline(&mut writer, &normalized_geometry);
 
     if request.detailed {
-        write_dimensions(&mut writer, &dimensions);
-        write_centerlines(&mut writer, &normalized_geometry, &bounds);
+        write_dimensions(&mut writer, &normalized_dimensions);
+        write_centerlines(&mut writer, &normalized_geometry, &normalized_bounds);
     }
 
     let dxf_content = writer.finish();

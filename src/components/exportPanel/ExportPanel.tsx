@@ -9,10 +9,10 @@ import {
 import { useShapeStore } from "../../store/shapeStore";
 import { usePreviewStore } from "../../store/previewStore";
 import { canvasToPngBytes } from "../../export/png";
+import { buildExportFilename } from "../../export/filenames";
 import { saveDxfFile, savePngFile } from "../../tauri/commands";
 import { svgToImage } from "../../utils/svgToImage";
 import { renderPreviewToCanvas } from "../preview/renderPreviewToCanvas";
-import { buildExportFilename } from "../../export/filenames";
 
 interface ExportPanelProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -52,7 +52,6 @@ export default function ExportPanel({ canvasRef }: ExportPanelProps) {
     const image = await svgToImage(preview.svg);
 
     const exportCanvas = document.createElement("canvas");
-
     const exportWidth = 1600;
     const exportHeight = 1200;
 

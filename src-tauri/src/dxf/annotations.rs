@@ -35,11 +35,7 @@ pub fn write_dimensions(writer: &mut DxfWriter, dimensions: &[DimensionData]) {
     }
 }
 
-pub fn write_centerlines(
-    writer: &mut DxfWriter,
-    geometry: &ShapeGeometry,
-    bounds: &Bounds,
-) {
+pub fn write_centerlines(writer: &mut DxfWriter, geometry: &ShapeGeometry, bounds: &Bounds) {
     if let Some(circle) = &geometry.circle {
         let horizontal_left = Point::new(bounds.min_x, circle.center.y);
         let horizontal_right = Point::new(bounds.max_x, circle.center.y);
@@ -68,8 +64,8 @@ fn write_end_tick(writer: &mut DxfWriter, point: &Point, reference: &Point) {
     let dy = reference.y - point.y;
     let length = (dx * dx + dy * dy).sqrt().max(1.0);
 
-    let ux = dx / length;
     let uy = dy / length;
+    let ux = dx / length;
 
     let px = -uy;
     let py = ux;

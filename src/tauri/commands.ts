@@ -21,3 +21,17 @@ export async function savePngFile(
     },
   });
 }
+
+export async function saveDxfFile(
+  fileName: string,
+  shapeConfig: ShapeConfig,
+  detailed: boolean
+): Promise<string> {
+  return invoke<string>("save_dxf_file", {
+    request: {
+      fileName,
+      shapeConfig,
+      detailed,
+    },
+  });
+}

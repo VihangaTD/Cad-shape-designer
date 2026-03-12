@@ -2,12 +2,10 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
   type PointerEvent,
   type RefObject,
 } from "react";
 import type { PreviewResponse } from "../../types/preview";
-import { svgToImage } from "../../utils/svgToImage";
 import { renderPreviewToCanvas } from "./renderPreviewToCanvas";
 import { useUiStore } from "../../store/uiStore";
 
@@ -20,9 +18,6 @@ export default function ShapePreviewCanvas({
   preview,
   canvasRef,
 }: ShapePreviewCanvasProps) {
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [imageError, setImageError] = useState<string | null>(null);
-
   const zoom = useUiStore((state) => state.zoom);
   const panX = useUiStore((state) => state.panX);
   const panY = useUiStore((state) => state.panY);
@@ -36,8 +31,8 @@ export default function ShapePreviewCanvas({
   const redrawKey = useMemo(
     () =>
       JSON.stringify({
-        svg: preview.svg,
         bounds: preview.bounds,
+        geometry: preview.geometry,
         dimensions: preview.dimensions,
         zoom,
         panX,
@@ -49,43 +44,12 @@ export default function ShapePreviewCanvas({
   );
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadImage() {
-      try {
-        setImageError(null);
-        const loadedImage = await svgToImage(preview.svg);
-
-        if (!cancelled) {
-          setImage(loadedImage);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setImage(null);
-          setImageError(
-            error instanceof Error
-              ? error.message
-              : "Failed to create preview image."
-          );
-        }
-      }
-    }
-
-    loadImage();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [preview.svg]);
-
-  useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !image) return;
+    if (!canvas) return;
 
     const render = () => {
       renderPreviewToCanvas({
         canvas,
-        image,
         preview,
         showDimensions,
         showGrid,
@@ -110,7 +74,6 @@ export default function ShapePreviewCanvas({
     };
   }, [
     canvasRef,
-    image,
     preview,
     redrawKey,
     showGrid,
@@ -144,12 +107,6 @@ export default function ShapePreviewCanvas({
 
   return (
     <div className="relative h-full min-h-[420px] overflow-hidden rounded-xl border border-slate-200 bg-white">
-      {imageError ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white">
-          <p className="text-sm font-medium text-red-600">{imageError}</p>
-        </div>
-      ) : null}
-
       <canvas
         ref={canvasRef}
         className="block h-full w-full cursor-grab active:cursor-grabbing"

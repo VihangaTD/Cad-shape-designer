@@ -17,6 +17,9 @@ interface RenderPreviewToCanvasOptions {
   showGrid?: boolean;
   padding?: number | FitPadding;
   backgroundColor?: string;
+  zoom?: number;
+  panX?: number;
+  panY?: number;
 }
 
 export function renderPreviewToCanvas({
@@ -27,6 +30,9 @@ export function renderPreviewToCanvas({
   showGrid = true,
   padding = 40,
   backgroundColor = "#ffffff",
+  zoom = 1,
+  panX = 0,
+  panY = 0,
 }: RenderPreviewToCanvasOptions): void {
   const isOffscreenCanvas =
     canvas.clientWidth === 0 || canvas.clientHeight === 0;
@@ -60,7 +66,10 @@ export function renderPreviewToCanvas({
     preview.bounds,
     displaySize.width,
     displaySize.height,
-    padding
+    padding,
+    zoom,
+    panX,
+    panY
   );
 
   drawShapeImage(ctx, {

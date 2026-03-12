@@ -4,7 +4,10 @@ import {
   getCanvasDisplaySize,
   resizeCanvasToDisplaySize,
 } from "../../utils/canvas";
-import { drawDimensions } from "./drawDimensions";
+import {
+  drawDimensionBodies,
+  drawDimensionExtensions,
+} from "./drawDimensions";
 import { drawGrid } from "./drawGrid";
 import { drawShapeImage } from "./drawShapeImage";
 import { fitToViewport, type FitPadding } from "./fitToViewport";
@@ -72,14 +75,25 @@ export function renderPreviewToCanvas({
     panY
   );
 
+  if (showDimensions) {
+    drawDimensionExtensions({
+      ctx,
+      dimensions: preview.dimensions,
+      fit,
+    });
+  }
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
   drawShapeImage(ctx, {
     image,
     fit,
     imageBounds: preview.bounds,
   });
+  ctx.restore();
 
   if (showDimensions) {
-    drawDimensions({
+    drawDimensionBodies({
       ctx,
       dimensions: preview.dimensions,
       fit,

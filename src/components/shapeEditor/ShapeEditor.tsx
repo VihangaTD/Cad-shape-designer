@@ -34,7 +34,7 @@ export default function ShapeEditor() {
           <span>{meta.label} parameters</span>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-3">
+        {/* <div className="rounded-xl border border-slate-200 bg-white p-3">
           <div className="mb-3 flex items-center gap-2 text-xs font-medium text-slate-600">
             <Grid3X3 size={14} />
             <span>Grid Snapping</span>
@@ -61,7 +61,7 @@ export default function ShapeEditor() {
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="space-y-3">
           {meta.parameterMeta.map((parameter) => (

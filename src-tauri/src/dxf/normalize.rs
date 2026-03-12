@@ -9,17 +9,20 @@ pub fn normalize_geometry_for_dxf(
 ) -> (ShapeGeometry, Bounds) {
     let bounds = calculate_geometry_bounds(geometry);
 
-    let dx = margin - bounds.min_x;
-    let dy = margin - bounds.min_y;
-
     let points = geometry
         .points
         .iter()
-        .map(|p| Point::new(p.x + dx, p.y + dy))
+        .map(|p| Point::new(
+            p.x - bounds.min_x + margin,
+            bounds.max_y - p.y + margin,
+        ))
         .collect::<Vec<_>>();
 
     let circle = geometry.circle.as_ref().map(|c| CircleData {
-        center: Point::new(c.center.x + dx, c.center.y + dy),
+        center: Point::new(
+            c.center.x - bounds.min_x + margin,
+            bounds.max_y - c.center.y + margin,
+        ),
         radius: c.radius,
     });
 
@@ -39,27 +42,27 @@ pub fn normalize_dimensions_for_dxf(
     original_bounds: &Bounds,
     margin: f64,
 ) -> Vec<DimensionData> {
-    let dx = margin - original_bounds.min_x;
-    let dy = margin - original_bounds.min_y;
-
     dimensions
         .iter()
         .map(|d| DimensionData {
             key: d.key.clone(),
             label: d.label.clone(),
-            line_start: shift_point(&d.line_start, dx, dy),
-            line_end: shift_point(&d.line_end, dx, dy),
-            ext1_start: shift_point(&d.ext1_start, dx, dy),
-            ext1_end: shift_point(&d.ext1_end, dx, dy),
-            ext2_start: shift_point(&d.ext2_start, dx, dy),
-            ext2_end: shift_point(&d.ext2_end, dx, dy),
-            text_position: shift_point(&d.text_position, dx, dy),
+            line_start: shift_and_flip_point(&d.line_start, original_bounds, margin),
+            line_end: shift_and_flip_point(&d.line_end, original_bounds, margin),
+            ext1_start: shift_and_flip_point(&d.ext1_start, original_bounds, margin),
+            ext1_end: shift_and_flip_point(&d.ext1_end, original_bounds, margin),
+            ext2_start: shift_and_flip_point(&d.ext2_start, original_bounds, margin),
+            ext2_end: shift_and_flip_point(&d.ext2_end, original_bounds, margin),
+            text_position: shift_and_flip_point(&d.text_position, original_bounds, margin),
         })
         .collect()
 }
 
-fn shift_point(point: &Point, dx: f64, dy: f64) -> Point {
-    Point::new(point.x + dx, point.y + dy)
+fn shift_and_flip_point(point: &Point, bounds: &Bounds, margin: f64) -> Point {
+    Point::new(
+        point.x - bounds.min_x + margin,
+        bounds.max_y - point.y + margin,
+    )
 }
 
 fn calculate_geometry_bounds(geometry: &ShapeGeometry) -> Bounds {

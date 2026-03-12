@@ -17,7 +17,10 @@ export function fitToViewport(
   bounds: Bounds,
   viewportWidth: number,
   viewportHeight: number,
-  padding: number | FitPadding = 40
+  padding: number | FitPadding = 40,
+  zoom = 1,
+  panX = 0,
+  panY = 0
 ): FitResult {
   const resolvedPadding =
     typeof padding === "number"
@@ -41,20 +44,24 @@ export function fitToViewport(
     viewportHeight - resolvedPadding.top - resolvedPadding.bottom
   );
 
-  const scale = Math.min(
+  const baseScale = Math.min(
     availableWidth / shapeWidth,
     availableHeight / shapeHeight
   );
 
+  const scale = baseScale * zoom;
+
   const offsetX =
     resolvedPadding.left +
     (availableWidth - shapeWidth * scale) / 2 -
-    bounds.minX * scale;
+    bounds.minX * scale +
+    panX;
 
   const offsetY =
     resolvedPadding.top +
     (availableHeight - shapeHeight * scale) / 2 -
-    bounds.minY * scale;
+    bounds.minY * scale +
+    panY;
 
   return {
     scale,

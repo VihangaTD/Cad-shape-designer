@@ -5,6 +5,8 @@ import { useShapeStore } from "../../store/shapeStore";
 import { usePreviewStore } from "../../store/previewStore";
 import { shapeMetaRegistry } from "../../shape-meta";
 import ShapePreviewCanvas from "./ShapePreviewCanvas";
+import PreviewToolbar from "./PreviewToolbar";
+import { useUiStore } from "../../store/uiStore";
 
 interface PreviewStageProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -15,13 +17,14 @@ export default function PreviewStage({ canvasRef }: PreviewStageProps) {
   const preview = usePreviewStore((state) => state.preview);
   const isLoading = usePreviewStore((state) => state.isLoading);
   const error = usePreviewStore((state) => state.error);
+  const resetView = useUiStore((state) => state.resetView);
 
   const meta = shapeMetaRegistry[config.type];
 
   return (
     <Panel
       title="Preview Workspace"
-      description="Live canvas preview with backend SVG and coordinate-based dimensions."
+      description="Live canvas preview with improved zoom, pan, grid, and dimensions."
       className="h-full min-h-[640px]"
     >
       <div className="flex h-[560px] flex-col gap-4">
@@ -43,6 +46,8 @@ export default function PreviewStage({ canvasRef }: PreviewStageProps) {
             </span>
           </div>
         </div>
+
+        <PreviewToolbar onFit={resetView} />
 
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="min-h-0">
@@ -70,7 +75,7 @@ export default function PreviewStage({ canvasRef }: PreviewStageProps) {
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-900">
-              Preview Details
+              Measurements
             </h3>
 
             <div className="mt-4 space-y-3">
@@ -87,29 +92,6 @@ export default function PreviewStage({ canvasRef }: PreviewStageProps) {
                   </span>
                 </div>
               ))}
-
-              <div className="rounded-lg bg-slate-50 px-3 py-2">
-                <p className="text-xs text-slate-500">Bounds</p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {preview
-                    ? `${preview.bounds.minX}, ${preview.bounds.minY} → ${preview.bounds.maxX}, ${preview.bounds.maxY}`
-                    : "-"}
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-slate-50 px-3 py-2">
-                <p className="text-xs text-slate-500">Dimension Count</p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {preview ? preview.dimensions.length : 0}
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-slate-50 px-3 py-2">
-                <p className="text-xs text-slate-500">ViewBox</p>
-                <p className="break-all text-sm font-semibold text-slate-900">
-                  {preview ? preview.viewBox : "-"}
-                </p>
-              </div>
             </div>
           </div>
         </div>

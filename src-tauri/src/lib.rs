@@ -1,9 +1,11 @@
 mod commands;
+mod dxf;
 mod geometry;
 mod models;
 mod shapes;
 mod svg;
 
+use commands::export_dxf::save_dxf_file;
 use commands::export_png::save_png_file;
 use commands::preview::generate_preview;
 
@@ -13,7 +15,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             generate_preview,
-            save_png_file
+            save_png_file,
+            save_dxf_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

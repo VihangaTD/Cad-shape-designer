@@ -28,7 +28,7 @@ export default function FlipControl({
               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
           ].join(" ")}
         >
-          <FlipHorizontal2 size={14} />
+          <FlipVertical2 size={14} />
           <span>X</span>
         </button>
 
@@ -42,7 +42,7 @@ export default function FlipControl({
               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
           ].join(" ")}
         >
-          <FlipVertical2 size={14} />
+          <FlipHorizontal2 size={14} />
           <span>Y</span>
         </button>
       </div>

@@ -1,5 +1,6 @@
 use crate::geometry::dimensions::common::edge_dimension;
 use crate::models::dimension_data::DimensionData;
+use crate::models::point::Point;
 use crate::models::shape_config::ShapeConfig;
 use crate::models::shape_geometry::ShapeGeometry;
 
@@ -25,20 +26,27 @@ pub fn build(
     let p4 = p[4].clone();
     let p5 = p[5].clone();
 
+    let shape_center = Point::new(
+        p.iter().map(|pt| pt.x).sum::<f64>() / p.len() as f64,
+        p.iter().map(|pt| pt.y).sum::<f64>() / p.len() as f64,
+    );
+
     Ok(vec![
         edge_dimension(
             "outerWidth",
             format!("{outer_width} mm"),
             p0.clone(),
             p1,
-            -50.0,
+            50.0,
+            &shape_center,
         ),
         edge_dimension(
             "outerHeight",
             format!("{outer_height} mm"),
             p5,
             p0,
-            -50.0,
+            50.0,
+            &shape_center,
         ),
         edge_dimension(
             "cutoutWidth",
@@ -46,6 +54,7 @@ pub fn build(
             p3.clone(),
             p2,
             45.0,
+            &shape_center,
         ),
         edge_dimension(
             "cutoutHeight",
@@ -53,6 +62,7 @@ pub fn build(
             p4,
             p3,
             45.0,
+            &shape_center,
         ),
     ])
 }

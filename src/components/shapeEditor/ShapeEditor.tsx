@@ -1,10 +1,12 @@
-import { Ruler, RotateCcw } from "lucide-react";
+import { RotateCcw, Ruler } from "lucide-react";
+import { shapeMetaRegistry } from "../../shape-meta";
+import { useShapeStore } from "../../store/shapeStore";
+import { useUiStore } from "../../store/uiStore";
+import { snapValue } from "../../utils/snap";
 import Panel from "../layout/Panel";
+import FlipControl from "./FlipControl";
 import ParameterInput from "./ParameterInput";
 import RotationControl from "./RotationControl";
-import FlipControl from "./FlipControl";
-import { useShapeStore } from "../../store/shapeStore";
-import { shapeMetaRegistry } from "../../shape-meta";
 
 export default function ShapeEditor() {
   const config = useShapeStore((state) => state.config);
@@ -13,6 +15,9 @@ export default function ShapeEditor() {
   const toggleFlipX = useShapeStore((state) => state.toggleFlipX);
   const toggleFlipY = useShapeStore((state) => state.toggleFlipY);
   const resetCurrentShape = useShapeStore((state) => state.resetCurrentShape);
+
+  const snapEnabled = useUiStore((state) => state.snapEnabled);
+  const snapSize = useUiStore((state) => state.snapSize);
 
   const meta = shapeMetaRegistry[config.type];
 
@@ -27,7 +32,7 @@ export default function ShapeEditor() {
           <span>{meta.label} parameters</span>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {meta.parameterMeta.map((parameter) => (
             <ParameterInput
               key={parameter.key}
@@ -35,21 +40,24 @@ export default function ShapeEditor() {
               value={config.parameters[parameter.key] ?? 0}
               min={parameter.min}
               step={parameter.step}
-              onChange={(value) => setParameter(parameter.key, value)}
+              onChange={(value) =>
+                setParameter(
+                  parameter.key,
+                  snapValue(value, snapEnabled, snapSize)
+                )
+              }
             />
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-3">
-          <RotationControl value={config.rotation} onChange={setRotation} />
+        <RotationControl value={config.rotation} onChange={setRotation} />
 
-          <FlipControl
-            flipX={config.flipX}
-            flipY={config.flipY}
-            onToggleX={toggleFlipX}
-            onToggleY={toggleFlipY}
-          />
-        </div>
+        <FlipControl
+          flipX={config.flipX}
+          flipY={config.flipY}
+          onToggleX={toggleFlipX}
+          onToggleY={toggleFlipY}
+        />
 
         <button
           type="button"

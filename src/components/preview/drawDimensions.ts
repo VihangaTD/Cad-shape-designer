@@ -18,6 +18,8 @@ export function drawDimensions({
   ctx.strokeStyle = "#334155";
   ctx.fillStyle = "#0f172a";
   ctx.lineWidth = 1.5;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
   ctx.font = "12px Inter, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -35,28 +37,30 @@ export function drawDimensions({
     drawLine(ctx, ext2Start.x, ext2Start.y, ext2End.x, ext2End.y);
     drawLine(ctx, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
 
-    drawEndTick(ctx, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
-    drawEndTick(ctx, lineEnd.x, lineEnd.y, lineStart.x, lineStart.y);
+    drawArrow(ctx, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
+    drawArrow(ctx, lineEnd.x, lineEnd.y, lineStart.x, lineStart.y);
 
     const metrics = ctx.measureText(dimension.label);
-    const boxWidth = metrics.width + 12;
-    const boxHeight = 20;
+    const boxWidth = metrics.width + 16;
+    const boxHeight = 24;
 
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.fillStyle = "rgba(255,255,255,0.98)";
     ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 1;
+
     ctx.beginPath();
     ctx.roundRect(
       textPosition.x - boxWidth / 2,
       textPosition.y - boxHeight / 2,
       boxWidth,
       boxHeight,
-      6
+      8
     );
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = "#0f172a";
+    ctx.font = "600 12px Inter, sans-serif";
     ctx.fillText(dimension.label, textPosition.x, textPosition.y);
 
     ctx.strokeStyle = "#334155";
@@ -79,7 +83,7 @@ function drawLine(
   ctx.stroke();
 }
 
-function drawEndTick(
+function drawArrow(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -96,10 +100,22 @@ function drawEndTick(
   const px = -uy;
   const py = ux;
 
-  const size = 5;
+  const arrowLength = 10;
+  const arrowWidth = 4;
+
+  const baseX = x + ux * arrowLength;
+  const baseY = y + uy * arrowLength;
+
+  const leftX = baseX + px * arrowWidth;
+  const leftY = baseY + py * arrowWidth;
+
+  const rightX = baseX - px * arrowWidth;
+  const rightY = baseY - py * arrowWidth;
 
   ctx.beginPath();
-  ctx.moveTo(x - px * size, y - py * size);
-  ctx.lineTo(x + px * size, y + py * size);
+  ctx.moveTo(x, y);
+  ctx.lineTo(leftX, leftY);
+  ctx.moveTo(x, y);
+  ctx.lineTo(rightX, rightY);
   ctx.stroke();
 }

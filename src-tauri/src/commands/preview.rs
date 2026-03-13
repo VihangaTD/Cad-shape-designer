@@ -30,6 +30,7 @@ pub fn generate_preview(shape_config: ShapeConfig) -> Result<PreviewResponse, St
         view_box,
         bounds,
         dimensions,
+        geometry: normalized_geometry,
     })
 }
 

@@ -6,27 +6,31 @@ import {
 } from "../../utils/canvas";
 import { drawDimensions } from "./drawDimensions";
 import { drawGrid } from "./drawGrid";
-import { drawShapeImage } from "./drawShapeImage";
+import { drawShapeVector } from "./drawShapeVector";
 import { fitToViewport, type FitPadding } from "./fitToViewport";
 
 interface RenderPreviewToCanvasOptions {
   canvas: HTMLCanvasElement;
-  image: CanvasImageSource;
   preview: PreviewResponse;
   showDimensions: boolean;
   showGrid?: boolean;
   padding?: number | FitPadding;
   backgroundColor?: string;
+  zoom?: number;
+  panX?: number;
+  panY?: number;
 }
 
 export function renderPreviewToCanvas({
   canvas,
-  image,
   preview,
   showDimensions,
   showGrid = true,
   padding = 40,
   backgroundColor = "#ffffff",
+  zoom = 1,
+  panX = 0,
+  panY = 0,
 }: RenderPreviewToCanvasOptions): void {
   const isOffscreenCanvas =
     canvas.clientWidth === 0 || canvas.clientHeight === 0;
@@ -60,13 +64,16 @@ export function renderPreviewToCanvas({
     preview.bounds,
     displaySize.width,
     displaySize.height,
-    padding
+    padding,
+    zoom,
+    panX,
+    panY
   );
 
-  drawShapeImage(ctx, {
-    image,
+  drawShapeVector({
+    ctx,
+    preview,
     fit,
-    imageBounds: preview.bounds,
   });
 
   if (showDimensions) {

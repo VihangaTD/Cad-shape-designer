@@ -1,9 +1,7 @@
-use crate::dxf::layers::{LAYER_CENTERLINES, LAYER_DIMENSIONS};
+use crate::dxf::layers::{ LAYER_DIMENSIONS};
 use crate::dxf::writer::DxfWriter;
-use crate::models::bounds::Bounds;
 use crate::models::dimension_data::DimensionData;
 use crate::models::point::Point;
-use crate::models::shape_geometry::ShapeGeometry;
 
 const DEFAULT_TEXT_HEIGHT: f64 = 22.0;
 const MIN_TEXT_HEIGHT: f64 = 12.0;
@@ -12,7 +10,6 @@ const MAX_TEXT_HEIGHT: f64 = 28.0;
 const TEXT_GAP: f64 = 16.0;
 const ARROW_LENGTH: f64 = 10.0;
 const ARROW_WIDTH: f64 = 4.5;
-const CENTERLINE_EXTEND: f64 = 20.0;
 const APPROX_TEXT_WIDTH_FACTOR: f64 = 0.62;
 
 pub fn write_dimensions(writer: &mut DxfWriter, dimensions: &[DimensionData]) {
@@ -71,30 +68,6 @@ pub fn write_dimensions(writer: &mut DxfWriter, dimensions: &[DimensionData]) {
             0.0,
         );
     }
-}
-
-pub fn write_centerlines(writer: &mut DxfWriter, geometry: &ShapeGeometry, bounds: &Bounds) {
-    if let Some(circle) = &geometry.circle {
-        let horizontal_left = Point::new(bounds.min_x - CENTERLINE_EXTEND, circle.center.y);
-        let horizontal_right = Point::new(bounds.max_x + CENTERLINE_EXTEND, circle.center.y);
-        let vertical_top = Point::new(circle.center.x, bounds.min_y - CENTERLINE_EXTEND);
-        let vertical_bottom = Point::new(circle.center.x, bounds.max_y + CENTERLINE_EXTEND);
-
-        writer.add_line(LAYER_CENTERLINES, &horizontal_left, &horizontal_right);
-        writer.add_line(LAYER_CENTERLINES, &vertical_top, &vertical_bottom);
-        return;
-    }
-
-    let cx = (bounds.min_x + bounds.max_x) / 2.0;
-    let cy = (bounds.min_y + bounds.max_y) / 2.0;
-
-    let horizontal_left = Point::new(bounds.min_x - CENTERLINE_EXTEND, cy);
-    let horizontal_right = Point::new(bounds.max_x + CENTERLINE_EXTEND, cy);
-    let vertical_top = Point::new(cx, bounds.min_y - CENTERLINE_EXTEND);
-    let vertical_bottom = Point::new(cx, bounds.max_y + CENTERLINE_EXTEND);
-
-    writer.add_line(LAYER_CENTERLINES, &horizontal_left, &horizontal_right);
-    writer.add_line(LAYER_CENTERLINES, &vertical_top, &vertical_bottom);
 }
 
 fn write_arrowhead(writer: &mut DxfWriter, tip: &Point, reference: &Point) {

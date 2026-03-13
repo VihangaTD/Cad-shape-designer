@@ -1,5 +1,5 @@
 use crate::commands::file_io::write_bytes_to_file;
-use crate::dxf::annotations::{write_centerlines, write_dimensions};
+use crate::dxf::annotations::{ write_dimensions};
 use crate::dxf::normalize::{normalize_dimensions_for_dxf, normalize_geometry_for_dxf};
 use crate::dxf::outline::write_outline;
 use crate::dxf::writer::DxfWriter;
@@ -24,7 +24,7 @@ pub async fn save_dxf_file(
 
     let dxf_margin = 20.0;
 
-    let (normalized_geometry, normalized_bounds) =
+    let (normalized_geometry, _normalized_bounds) =
         normalize_geometry_for_dxf(&transformed_geometry, dxf_margin);
 
     let normalized_dimensions =
@@ -36,7 +36,6 @@ pub async fn save_dxf_file(
 
     if request.detailed {
         write_dimensions(&mut writer, &normalized_dimensions);
-        write_centerlines(&mut writer, &normalized_geometry, &normalized_bounds);
     }
 
     let dxf_content = writer.finish();

@@ -22,6 +22,8 @@ pub fn build(shape_config: &ShapeConfig) -> Result<ShapeGeometry, String> {
             Point::new(0.0, height),
         ],
         circle: None,
+        holes: vec![],
+        corner_labels: vec![],
     })
 }
 

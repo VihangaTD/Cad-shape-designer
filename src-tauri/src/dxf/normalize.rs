@@ -1,7 +1,7 @@
 use crate::models::bounds::Bounds;
 use crate::models::dimension_data::DimensionData;
 use crate::models::point::Point;
-use crate::models::shape_geometry::{CircleData, ShapeGeometry};
+use crate::models::shape_geometry::{CircleData, CornerLabel, ShapeGeometry};
 
 pub fn normalize_geometry_for_dxf(
     geometry: &ShapeGeometry,
@@ -26,10 +26,36 @@ pub fn normalize_geometry_for_dxf(
         radius: c.radius,
     });
 
+    let holes = geometry
+        .holes
+        .iter()
+        .map(|c| CircleData {
+            center: Point::new(
+                c.center.x - bounds.min_x + margin,
+                bounds.max_y - c.center.y + margin,
+            ),
+            radius: c.radius,
+        })
+        .collect::<Vec<_>>();
+
+    let corner_labels = geometry
+        .corner_labels
+        .iter()
+        .map(|label| CornerLabel {
+            id: label.id.clone(),
+            point: Point::new(
+                label.point.x - bounds.min_x + margin,
+                bounds.max_y - label.point.y + margin,
+            ),
+        })
+        .collect::<Vec<_>>();
+
     let normalized = ShapeGeometry {
         shape_type: geometry.shape_type.clone(),
         points,
         circle,
+        holes,
+        corner_labels,
     };
 
     let normalized_bounds = calculate_geometry_bounds(&normalized);

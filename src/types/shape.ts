@@ -7,12 +7,21 @@ export type ShapeType =
 
 export type Rotation = 0 | 90 | 180 | 270;
 
+export interface CircleCutConfig {
+  enabled: boolean;
+  cornerId: string;
+  offsetX: number;
+  offsetY: number;
+  radius: number;
+}
+
 export interface ShapeConfig {
   type: ShapeType;
   parameters: Record<string, number>;
   rotation: Rotation;
   flipX: boolean;
   flipY: boolean;
+  circleCut?: CircleCutConfig;
 }
 
 export interface ShapeParameterMeta {

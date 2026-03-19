@@ -12,6 +12,8 @@ pub fn build(shape_config: &ShapeConfig) -> Result<ShapeGeometry, String> {
             center: Point::new(radius, radius),
             radius,
         }),
+        holes: vec![],
+        corner_labels: vec![],
     })
 }
 

@@ -18,11 +18,49 @@ pub fn render_svg(geometry: &ShapeGeometry) -> String {
         );
     }
 
-    let points = polygon_points(&geometry.points);
+    let path_data = build_polygon_with_holes_path(geometry);
 
     format!(
         r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}">
-  <polygon points="{points}" fill="{FILL_COLOR}" stroke="{STROKE_COLOR}" stroke-width="{STROKE_WIDTH}" />
+  <path d="{path_data}" fill="{FILL_COLOR}" stroke="{STROKE_COLOR}" stroke-width="{STROKE_WIDTH}" fill-rule="evenodd" />
 </svg>"#
+    )
+}
+
+fn build_polygon_with_holes_path(geometry: &ShapeGeometry) -> String {
+    let mut path = String::new();
+
+    if !geometry.points.is_empty() {
+        let first = &geometry.points[0];
+        path.push_str(&format!("M {} {} ", first.x, first.y));
+
+        for point in geometry.points.iter().skip(1) {
+            path.push_str(&format!("L {} {} ", point.x, point.y));
+        }
+
+        path.push_str("Z ");
+    }
+
+    for hole in &geometry.holes {
+        path.push_str(&circle_path(hole.center.x, hole.center.y, hole.radius));
+        path.push(' ');
+    }
+
+    path.trim().to_string()
+}
+
+fn circle_path(cx: f64, cy: f64, r: f64) -> String {
+    format!(
+        "M {} {} \
+         a {} {} 0 1 0 {} 0 \
+         a {} {} 0 1 0 {} 0 Z",
+        cx - r,
+        cy,
+        r,
+        r,
+        2.0 * r,
+        r,
+        r,
+        -2.0 * r
     )
 }

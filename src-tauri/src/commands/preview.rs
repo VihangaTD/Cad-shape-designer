@@ -1,4 +1,5 @@
 use crate::geometry::bounds::calculate_bounds;
+use crate::geometry::corner_features::attach_corner_labels_and_cut;
 use crate::geometry::dimensions::build_dimensions;
 use crate::geometry::normalize::normalize_geometry;
 use crate::geometry::transform::apply_transforms;
@@ -13,7 +14,8 @@ pub fn generate_preview(shape_config: ShapeConfig) -> Result<PreviewResponse, St
 
     let raw_geometry = build_shape_geometry(&shape_config)?;
     let transformed_geometry = apply_transforms(&raw_geometry, &shape_config);
-    let normalized_geometry = normalize_geometry(&transformed_geometry, 40.0);
+    let featured_geometry = attach_corner_labels_and_cut(&transformed_geometry, &shape_config)?;
+    let normalized_geometry = normalize_geometry(&featured_geometry, 40.0);
 
     let bounds = calculate_bounds(&normalized_geometry);
     let dimensions = build_dimensions(&normalized_geometry, &shape_config)?;

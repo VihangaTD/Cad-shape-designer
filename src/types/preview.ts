@@ -6,10 +6,17 @@ export interface CircleGeometry {
   radius: number;
 }
 
+export interface CornerLabel {
+  id: string;
+  point: Point;
+}
+
 export interface ShapeGeometry {
   shapeType: string;
   points: Point[];
   circle: CircleGeometry | null;
+  holes: CircleGeometry[];
+  cornerLabels: CornerLabel[];
 }
 
 export interface PreviewResponse {

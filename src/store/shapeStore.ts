@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { shapeMetaRegistry } from "../shape-meta";
-import type { Rotation, ShapeConfig, ShapeType } from "../types/shape";
+import type {
+  CircleCutConfig,
+  Rotation,
+  ShapeConfig,
+  ShapeType,
+} from "../types/shape";
 
 interface ShapeStore {
   config: ShapeConfig;
@@ -9,10 +14,20 @@ interface ShapeStore {
   setRotation: (rotation: Rotation) => void;
   toggleFlipX: () => void;
   toggleFlipY: () => void;
+  setCircleCut: (circleCut: CircleCutConfig) => void;
+  updateCircleCut: (patch: Partial<CircleCutConfig>) => void;
   resetCurrentShape: () => void;
 }
 
 const defaultType: ShapeType = "rectangle";
+
+const defaultCircleCut: CircleCutConfig = {
+  enabled: false,
+  cornerId: "c1",
+  offsetX: 100,
+  offsetY: -100,
+  radius: 50,
+};
 
 export const useShapeStore = create<ShapeStore>((set, get) => ({
   config: {
@@ -21,6 +36,7 @@ export const useShapeStore = create<ShapeStore>((set, get) => ({
     rotation: 0,
     flipX: false,
     flipY: false,
+    circleCut: { ...defaultCircleCut },
   },
 
   selectShape: (shapeType) => {
@@ -33,6 +49,7 @@ export const useShapeStore = create<ShapeStore>((set, get) => ({
         rotation: 0,
         flipX: false,
         flipY: false,
+        circleCut: { ...defaultCircleCut },
       },
     });
   },
@@ -78,6 +95,31 @@ export const useShapeStore = create<ShapeStore>((set, get) => ({
     });
   },
 
+  setCircleCut: (circleCut) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        circleCut,
+      },
+    }));
+  },
+
+  updateCircleCut: (patch) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        circleCut: {
+          enabled: state.config.circleCut?.enabled ?? false,
+          cornerId: state.config.circleCut?.cornerId ?? "c1",
+          offsetX: state.config.circleCut?.offsetX ?? 100,
+          offsetY: state.config.circleCut?.offsetY ?? -100,
+          radius: state.config.circleCut?.radius ?? 50,
+          ...patch,
+        },
+      },
+    }));
+  },
+
   resetCurrentShape: () => {
     const { config } = get();
     const meta = shapeMetaRegistry[config.type];
@@ -89,6 +131,7 @@ export const useShapeStore = create<ShapeStore>((set, get) => ({
         rotation: 0,
         flipX: false,
         flipY: false,
+        circleCut: { ...defaultCircleCut },
       },
     });
   },
